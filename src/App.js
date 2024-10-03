@@ -13,15 +13,44 @@ import { useState } from 'react';
 import Modal from 'react-bootstrap/Modal';
 
 function App() {
-  const [show, setShow] = useState(false);
 
-  const handleClose = () => setShow(false);
-  const handleShow = () => setShow(true);
+
+  const [cart, setCart] = useState({});
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const addToCart = (item) => {
+    setCart((prevCart) => {
+      const newCart = { ...prevCart };
+      if (newCart[item]) {
+        newCart[item] += 1;
+      } else {
+        newCart[item] = 1;
+      }
+      return newCart;
+    });
+  };
+
+  const updateCartItem = (item, action) => {
+    setCart((prevCart) => {
+      const newCart = { ...prevCart };
+      if (action === 'increase') {
+        newCart[item] += 1;
+      } else if (action === 'decrease' && newCart[item] > 1) {
+        newCart[item] -= 1;
+      } else {
+        delete newCart[item];
+      }
+      return newCart;
+    });
+  };
+
+  const cartItemCount = Object.values(cart).reduce((acc, count) => acc + count, 0);
+
   return (
     <Container>
       <Row><Navbar expand="lg" className="bg-body-tertiary">
       <Container fluid>
-        <Navbar.Brand href="#">Navbar scroll</Navbar.Brand>
+        <Navbar.Brand href="#">Pizza House</Navbar.Brand>
         <Navbar.Toggle aria-controls="navbarScroll" />
         <Navbar.Collapse id="navbarScroll">
           <Nav
@@ -30,19 +59,9 @@ function App() {
             navbarScroll
           >
             <Nav.Link href="#action1">Home</Nav.Link>
-            <Nav.Link href="#action2">Link</Nav.Link>
-            <NavDropdown title="Link" id="navbarScrollingDropdown">
-              <NavDropdown.Item href="#action3">Action</NavDropdown.Item>
-              <NavDropdown.Item href="#action4">
-                Another action
-              </NavDropdown.Item>
-              <NavDropdown.Divider />
-              <NavDropdown.Item href="#action5">
-                Something else here
-              </NavDropdown.Item>
-            </NavDropdown>
+            <Nav.Link href="#action2">About us</Nav.Link>
             <Nav.Link href="#" disabled>
-              Link
+              Contact
             </Nav.Link>
           </Nav>
           <Form className="d-flex">
@@ -54,8 +73,8 @@ function App() {
             />
             <Button variant="outline-success">Search</Button>
           </Form>
-          <Button variant="primary" onClick={handleShow} className='mx-2'>
-      Profile <Badge bg="secondary">9</Badge>
+          <Button variant="primary" onClick={() => setIsModalOpen(true)} className='mx-2'>
+      Items: <Badge bg="secondary">{cartItemCount}</Badge>
       <span className="visually-hidden">unread messages</span>
     </Button>
         </Navbar.Collapse>
@@ -98,12 +117,12 @@ function App() {
       <Card>
       <Card.Img variant="top" src={menu1} />
       <Card.Body>
-        <Card.Title>Card Title</Card.Title>
+        <Card.Title>Card Title 1</Card.Title>
         <Card.Text>
           Some quick example text to build on the card title and make up the
           bulk of the card's content.
         </Card.Text>
-        <Button variant="primary">Go somewhere</Button>
+        <Button onClick={() => addToCart('Card Title 1')} variant="primary">Buy</Button>
       </Card.Body>
     </Card>
       </Col>
@@ -111,12 +130,12 @@ function App() {
       <Card>
       <Card.Img variant="top" src={menu2} />
       <Card.Body>
-        <Card.Title>Card Title</Card.Title>
+        <Card.Title>Card Title 2</Card.Title>
         <Card.Text>
           Some quick example text to build on the card title and make up the
           bulk of the card's content.
         </Card.Text>
-        <Button variant="primary">Go somewhere</Button>
+        <Button onClick={() => addToCart('Card Title 2')} variant="primary">Buy</Button>
       </Card.Body>
     </Card>
       </Col>
@@ -124,12 +143,12 @@ function App() {
       <Card>
       <Card.Img variant="top" src={menu3} />
       <Card.Body>
-        <Card.Title>Card Title</Card.Title>
+        <Card.Title>Card Title 3</Card.Title>
         <Card.Text>
           Some quick example text to build on the card title and make up the
           bulk of the card's content.
         </Card.Text>
-        <Button variant="primary">Go somewhere</Button>
+        <Button onClick={() => addToCart('Card Title 3')} variant="primary">Buy</Button>
       </Card.Body>
     </Card>
       </Col>
@@ -137,30 +156,35 @@ function App() {
       <Card>
       <Card.Img variant="top" src={menu4} />
       <Card.Body>
-        <Card.Title>Card Title</Card.Title>
+        <Card.Title>Card Title 4</Card.Title>
         <Card.Text>
           Some quick example text to build on the card title and make up the
           bulk of the card's content.
         </Card.Text>
-        <Button variant="primary">Go somewhere</Button>
+        <Button onClick={() => addToCart('Card Title 4')} variant="primary">Buy</Button>
       </Card.Body>
     </Card>
       </Col>
-      <Button variant="primary" onClick={handleShow}>
-        Launch demo modal
-      </Button>
-
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={isModalOpen} onHide={() => setIsModalOpen(false)}>
         <Modal.Header closeButton>
-          <Modal.Title>Modal heading</Modal.Title>
+          <Modal.Title>Using grid in Modal</Modal.Title>
         </Modal.Header>
-        <Modal.Body>Woohoo, you are reading this text in a modal!</Modal.Body>
+        {Object.keys(cart).length === 0 ? (
+        <p>Your cart is empty.</p>
+      ) : (
+        <ul>
+          {Object.keys(cart).map((item) => (
+            <li key={item}>
+              {item} - Quantity: {cart[item]}
+              <button onClick={() => updateCartItem(item, 'increase')}>+</button>
+              <button onClick={() => updateCartItem(item, 'decrease')}>-</button>
+            </li>
+          ))}
+        </ul>
+      )}
         <Modal.Footer>
-          <Button variant="secondary" onClick={handleClose}>
+          <Button variant="secondary" onClick={() => setIsModalOpen(false)}>
             Close
-          </Button>
-          <Button variant="primary" onClick={handleClose}>
-            Save Changes
           </Button>
         </Modal.Footer>
       </Modal>
